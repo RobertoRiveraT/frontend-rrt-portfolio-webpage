@@ -275,15 +275,93 @@
    ============================================ */
 
 .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
     border-top: 1px solid rgba(0, 0, 0, 0.05);
     margin-top: auto;
+    gap: var(--spacing-md);
 }
 
 .footer-actions {
     display: flex;
     gap: var(--spacing-sm);
     flex-wrap: wrap;
+    flex: 1;
+}
+
+/* ============================================
+   SHARE BUTTON
+   ============================================ */
+
+.share-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.btn-share {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: var(--color-neutral-100);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-share:hover {
+    background: var(--color-primary);
+    transform: scale(1.1);
+}
+
+.btn-share:hover .share-icon {
+    stroke: white;
+}
+
+.share-icon {
+    width: 20px;
+    height: 20px;
+    stroke: var(--color-neutral-500);
+    transition: stroke 0.2s ease;
+}
+
+/* Share Tooltip */
+.share-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    padding: 8px 12px;
+    background: var(--color-neutral-700);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(5px);
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.share-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    right: 16px;
+    border: 6px solid transparent;
+    border-top-color: var(--color-neutral-700);
+}
+
+.share-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
 /* Buttons */
@@ -414,13 +492,40 @@
         font-size: 0.85rem;
     }
 
+    .card-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
     .footer-actions {
         flex-direction: column;
+        width: 100%;
     }
 
     .btn {
         width: 100%;
         justify-content: center;
+    }
+
+    .share-container {
+        justify-content: flex-end;
+        margin-top: var(--spacing-sm);
+    }
+
+    .share-tooltip {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%) translateY(5px);
+    }
+
+    .share-tooltip.visible {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .share-tooltip::after {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     .modal-close {

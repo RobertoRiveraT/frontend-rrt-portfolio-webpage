@@ -1,6 +1,43 @@
-# Frontend - Webpage Portfolio (Angular)
+# 🚀 Roberto Rivera - Portfolio Website
 
-This project is the **frontend** for my personal portfolio website, developed with **Angular** and deployed via **Vercel**. It showcases my fullstack capabilities through a responsive and modular design, secure authentication flows, and integration with backend APIs powered by **FastAPI**.
+A modern, scalable personal portfolio built with **Angular 15**, featuring a modular architecture, lazy-loaded modules, and an integrated chatbot demo.
+
+🌐 **Live Site:** [rrtportfolio.com](https://www.rrtportfolio.com)
+
+---
+
+## ✨ Features
+
+### 📋 **My Work Section**
+- **Dynamic Filtering System**
+  - Filter by category: Projects, QA, Fullstack, GameDev, Education
+  - Filter by year via dropdown (adapts to selected category)
+  - Combined filters with URL persistence (shareable links)
+  - Results counter with active filter indicators
+
+- **Modern Card Design**
+  - Large thumbnail headers with zoom effect
+  - Category tags with distinct colors
+  - Expandable "Read More" sections
+  - **Share button** with Web Share API / clipboard fallback
+
+- **Responsive Layouts**
+  - Grid view (multi-column) when viewing all items
+  - List view (single column) when filtering by category
+  - Mobile-optimized with full-width cards
+
+### 💬 **Chatbot Demo**
+- Complete authentication flow (JWT-based)
+- Real-time chat with AI assistant
+- Chat history persistence (PostgreSQL backend)
+- Account management (update email/password, delete account)
+
+### 🏗️ **Architecture Highlights**
+- **Lazy Loading**: Chatbot and Games modules loaded on demand
+- **Design Tokens**: CSS variables for consistent theming
+- **HTTP Interceptor**: Automatic JWT injection
+- **Route Guards**: Protected routes for authenticated users
+- **Standalone AuthService**: Centralized authentication state
 
 ---
 
@@ -9,142 +46,183 @@ This project is the **frontend** for my personal portfolio website, developed wi
 ```
 frontend-webpage/
 ├── src/
-│   ├── app/               # Angular components and views
-│   ├── assets/            # Static images and resources
-│   └── environments/      # Environment-specific configs
-├── scripts/               # Utility scripts (env var handling, etc.)
-├── angular.json           # Angular CLI configuration
-├── package.json           # Dependencies and commands
-├── README.md              # This file
+│   ├── app/
+│   │   ├── articles/           # Work items data (by year)
+│   │   ├── components/         # Shared components
+│   │   │   ├── header/         # Navigation sidebar
+│   │   │   └── work-card/      # Project card component
+│   │   ├── guards/             # Route guards (AuthGuard)
+│   │   ├── interceptors/       # HTTP interceptors
+│   │   ├── pages/
+│   │   │   ├── home/           # Landing page
+│   │   │   ├── aboutme/        # About section
+│   │   │   ├── mywork/         # Portfolio with filters
+│   │   │   ├── contact/        # Contact info
+│   │   │   ├── chatbot/        # 🔄 Lazy loaded module
+│   │   │   └── games/          # 🔄 Lazy loaded module
+│   │   └── services/           # API & Auth services
+│   ├── assets/                 # Images, icons, CV
+│   └── environments/           # Environment configs
+├── scripts/                    # Build utilities
+└── angular.json                # Angular configuration
 ```
 
 ---
 
-## 🌐 Deployment Links
+## 🎨 Design System
 
-| Environment | URL                                                                 |
-|-------------|---------------------------------------------------------------------|
-| Production  | [Production webpage](https://www.rrtportfolio.com)                  |
-| QA-Staging  | [QA Webpage](https://rrt-frontend-qa.vercel.app)                    |
-| Dev         | [Dev Webpage](https://rrt-frontend-dev.vercel.app)                  |
+### CSS Variables (Design Tokens)
 
----
+```css
+/* Primary Colors */
+--color-primary: #1ad8fa;
+--color-primary-dark: #007acc;
 
-## 🧠 What This Project Demonstrates
+/* Secondary (Green) */
+--color-secondary: #41e392;
 
-- 💬 **Chatbot Integration**: The app includes a complete chatbot interface where users can log in and chat with an AI assistant. The chat is stored persistently in **PostgreSQL**, and the backend constructs prompts with user history and a predefined persona before sending requests to **OpenAI API**.
+/* Accent */
+--color-accent: #ffcc00;
+--color-accent-orange: #ffb347;
 
-- 🔐 **Authentication Flow**: Features **JWT-based** login, registration, and route guards. After successful registration or login, users are redirected to `/chatbot/chat`. If not authenticated, they are rerouted to `/chatbot/login`.
-
-- 📖 **Interactive Tutorials**: The site features an educational step-by-step tutorial system (Steps 1–4), visually styled and embedded in the layout to explain the frontend/backend behavior.
-
-- 🛠️ **Account Management**: Authenticated users can access `/account` to update their email and password or delete their account. These are sent as PUT/DELETE requests and are protected via JWT.
-
-- 📋 **MyWork Section**: A visually styled section with dynamic filtering (Projects vs Certifications), showcasing a scalable card system with thumbnails, metadata, bullets, collapsible content, and links.
-
----
-
-## ⚙️ Environment Configuration
-
-| Variable   | Description                              |
-|------------|------------------------------------------|
-| BASE_URL   | Dynamically injected backend API URL     |
-
-### 📁 Generated File
-
-`src/assets/env.js` → created via `scripts/write-env.js`.
-
-> In **local development**, `env.js` is generated based on the environment (`.env.production`, `.env.staging`, etc).
-
-> In **Vercel production builds**, `env.js` is skipped and environment variables are read directly from Vercel settings.
-
-### ✅ Example `.env` Files
-
-```
-# .env.production
-BASE_URL=https://production.backend.url
-
-# .env.staging
-BASE_URL=https://qa.backend.url
+/* Spacing Scale */
+--spacing-sm: 0.5rem;
+--spacing-md: 1rem;
+--spacing-lg: 1.5rem;
+--spacing-xl: 2rem;
 ```
 
-These files are **ignored by Git**.
+### Category Colors
+| Category | Color |
+|----------|-------|
+| Projects | Cyan `#1ad8fa` |
+| QA | Orange `#ffb347` |
+| Fullstack | Purple `#7c3aed` |
+| GameDev | Red `#dc2626` |
+| Education | Green `#41e392` |
 
 ---
 
-## 🚀 Development & Builds
+## 🌐 Deployment
 
-### 🛠️ Local Development
+| Environment | URL | Branch |
+|-------------|-----|--------|
+| Production | [rrtportfolio.com](https://www.rrtportfolio.com) | `main` |
+| QA-Staging | [rrt-frontend-qa.vercel.app](https://rrt-frontend-qa.vercel.app) | `qa-staging` |
+
+### Build Commands
 
 ```bash
-# QA-Staging mode
-npm run serve:qa
+# Development
+npm start
 
-# Production mode (with local env.js)
-npm run serve:production
-```
-
-### 🧪 QA-Staging Build
-
-```bash
+# QA-Staging build
 npm run build:qa-staging
-```
 
-### 🏭 Production Build
-
-```bash
+# Production build
 npm run build:production
 ```
 
 ---
 
-## ⚙️ Build Script Behavior
+## ⚙️ Technical Stack
 
-The `scripts/write-env.js` will skip generating `env.js` if `NODE_ENV=production` to avoid exposing variables in Vercel builds.
+| Technology | Purpose |
+|------------|---------|
+| Angular 15 | Frontend framework |
+| TypeScript | Type-safe development |
+| Angular Material | UI components |
+| RxJS | Reactive state management |
+| Vercel | Hosting & CI/CD |
 
-In local dev:
+### Backend Integration
+- FastAPI (Python)
+- PostgreSQL database
+- OpenAI API for chatbot
+- JWT authentication
+
+🔗 [Backend Repository](https://github.com/RobertoRiveraT/backend-rrt-portfolio-webpage)
+
+---
+
+## 🔧 Environment Setup
+
+### Required Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `BASE_URL` | Backend API URL |
+
+### Local Development
+
 ```bash
-NODE_ENV=production-local npm run serve:production
+# Install dependencies
+npm install
 
-or
+# Run development server
+npm start
 
-NODE_ENV=staging npm run serve:staging
+# Run with QA environment
+npm run serve:qa
 ```
-It will still generate `env.js` using `.env.production` or `.env.staging` depending on what will be tested.
 
 ---
 
-## ✅ Automatic Deployment
+## 📱 Responsive Breakpoints
 
-- **QA-Staging** → triggered on `qa-staging` branch push.
-- **Production** → triggered on `main` branch push.
-
-Environment variables are injected automatically via Vercel.
-
----
-
-## 📂 Branch Structure (GitHub)
-
-| Branch         | Purpose                      |
-|----------------|------------------------------|
-| `dev`          | Active development           |
-| `qa-staging`   | QA testing deployments       |
-| `main`         | Production releases          |
+| Breakpoint | Layout |
+|------------|--------|
+| > 900px | Multi-column grid |
+| 768-900px | Single column |
+| < 768px | Mobile optimized |
 
 ---
 
-## 🧾 Related Projects
+## 🚀 Performance Optimizations
 
-- 🔙 [Backend Repository](https://github.com/RobertoRiveraT/backend-rrt-portfolio-webpage)
+- **Lazy Loading**: ~140KB saved on initial load
+  - Chatbot module: 136KB (loaded on demand)
+  - Games module: 5KB (loaded on demand)
+- **TrackBy**: Optimized ngFor rendering
+- **CSS Variables**: Reduced style duplication
+- **Image optimization**: Lazy loading thumbnails
 
 ---
 
-## 🧪 Testing
+## 📂 Adding New Projects
 
-No unit tests implemented yet, but **Jasmine** and **Karma** setup is planned.
+1. Create a new folder in `src/app/articles/items/[YEAR]/`
+2. Add a `.project.ts` file following the `WorkItem` interface:
+
+```typescript
+import { WorkItem } from '../../../work-item.interface';
+
+export const MyProject: WorkItem = {
+    title: 'Project Name',
+    category: ['Projects', 'Fullstack'],
+    cardColor: 'blue',
+    startDate: '2025-01',
+    endDate: '2025-02',
+    description: 'Project description...',
+    bullets: ['Feature 1', 'Feature 2'],
+    link: 'https://project-url.com',
+    thumbnail: 'assets/img/work/2025/project_thumb.jpg'
+};
+```
+
+3. Import and add to `work-items.ts`
 
 ---
 
 ## 👨‍💻 Author
 
-Built by [Roberto Rivera](https://github.com/RobertoRiveraT) as part of the fullstack chatbot-portfolio showcase.
+**Roberto Rivera Terán**
+- GitHub: [@RobertoRiveraT](https://github.com/RobertoRiveraT)
+- LinkedIn: [robertoriverateran](https://linkedin.com/in/robertoriverateran/)
+- Website: [rrtportfolio.com](https://www.rrtportfolio.com)
+
+---
+
+## 📄 License
+
+This project is for portfolio demonstration purposes.

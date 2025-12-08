@@ -26,13 +26,23 @@ export class MyworkComponent implements OnInit, OnDestroy {
   /** Show/hide scroll to top button */
   showScrollTop = false;
 
+  /** Year dropdown state */
+  isYearDropdownOpen = false;
+
   /** Available filter categories */
   readonly categories: ReadonlyArray<WorkCategory | 'All'> = [
     'All', 
     'Projects', 
     'QA',
+    'Fullstack',
+    'GameDev',
     'Certifications'
   ];
+
+  /** Check if grid view should be used (only when category is 'All') */
+  get useGridView(): boolean {
+    return this.selectedCategory === 'All';
+  }
 
   private destroy$ = new Subject<void>();
 
@@ -109,12 +119,20 @@ export class MyworkComponent implements OnInit, OnDestroy {
     return items;
   }
 
-  /** Get count of items for a specific year */
+  /** Get count of items for a specific year (filtered by current category) */
   getYearCount(year: string): number {
-    if (year === 'All') {
-      return this.allItems.length;
+    // First filter by category if one is selected
+    let items = this.allItems;
+    if (this.selectedCategory !== 'All') {
+      const selected: WorkCategory = this.selectedCategory;
+      items = items.filter(item => item.category.includes(selected));
     }
-    return this.allItems.filter(item => item.startDate.startsWith(year)).length;
+
+    // Then count by year
+    if (year === 'All') {
+      return items.length;
+    }
+    return items.filter(item => item.startDate.startsWith(year)).length;
   }
 
   /** Get count of items for a specific category */
@@ -125,9 +143,35 @@ export class MyworkComponent implements OnInit, OnDestroy {
     return this.allItems.filter(item => item.category.includes(category)).length;
   }
 
+  /** Get available years filtered by current category */
+  get filteredAvailableYears(): string[] {
+    let items = this.allItems;
+    
+    // Filter by category if one is selected
+    if (this.selectedCategory !== 'All') {
+      const selected: WorkCategory = this.selectedCategory;
+      items = items.filter(item => item.category.includes(selected));
+    }
+
+    // Extract unique years from filtered items
+    const yearsSet = new Set<string>();
+    items.forEach(item => {
+      const year = item.startDate.substring(0, 4);
+      yearsSet.add(year);
+    });
+
+    return Array.from(yearsSet).sort((a, b) => b.localeCompare(a));
+  }
+
   /** Filter by category and update URL */
   filterCategory(category: WorkCategory | 'All'): void {
     this.selectedCategory = category;
+    
+    // Reset year filter if the selected year is no longer available in this category
+    if (this.selectedYear !== 'All' && !this.filteredAvailableYears.includes(this.selectedYear)) {
+      this.selectedYear = 'All';
+    }
+    
     this.updateUrlParams();
   }
 
@@ -135,6 +179,26 @@ export class MyworkComponent implements OnInit, OnDestroy {
   filterYear(year: string): void {
     this.selectedYear = year;
     this.updateUrlParams();
+  }
+
+  /** Toggle year dropdown */
+  toggleYearDropdown(): void {
+    this.isYearDropdownOpen = !this.isYearDropdownOpen;
+  }
+
+  /** Select year from dropdown */
+  selectYear(year: string): void {
+    this.filterYear(year);
+    this.isYearDropdownOpen = false;
+  }
+
+  /** Close dropdown when clicking outside */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.year-dropdown-container')) {
+      this.isYearDropdownOpen = false;
+    }
   }
 
   /** Update URL query params with current filters */
