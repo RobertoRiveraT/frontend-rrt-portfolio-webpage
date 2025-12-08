@@ -1,12 +1,12 @@
 main {
-    margin-left: 300px; /* coincide con el nuevo ancho del sidebar */
+    margin-left: var(--sidebar-width);
     padding: 0;
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
-    color: #222;
-    background-color: #f9f9f9;
+    font-family: var(--font-family-base);
+    color: var(--color-neutral-700);
+    background-color: var(--color-neutral-50);
     margin: 0;
 }
 
@@ -14,7 +14,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 64px;
+    height: var(--header-height);
 }
 
 @media (max-width: 768px) {

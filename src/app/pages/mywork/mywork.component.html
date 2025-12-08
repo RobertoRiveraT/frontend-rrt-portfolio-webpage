@@ -4,22 +4,90 @@
     <p>A showcase of projects, certifications, and relevant milestones in my career.</p>
 </section>
 
-<!-- Filter Sidebar -->
-<aside class="filter-panel">
-    <h3>Filter by Category</h3>
-    <div class="filter-buttons">
-        <button class="filter-btn" (click)="filterCategory('All')">All</button>
-        <button class="filter-btn" (click)="filterCategory('Projects')">Projects</button>
-        <button class="filter-btn" (click)="filterCategory('QA')">QA</button>
-        <button class="filter-btn" (click)="filterCategory('Certifications')">Education & Certifications</button>
+<!-- Filters Section -->
+<aside class="filters-container">
+    <!-- Category Filter -->
+    <div class="filter-group">
+        <h3 class="filter-title">
+            <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+            Category
+        </h3>
+        <div class="filter-buttons">
+            <button 
+                *ngFor="let cat of categories"
+                class="filter-btn"
+                [class.active]="selectedCategory === cat"
+                [ngClass]="{
+                    'btn-all': cat === 'All',
+                    'btn-projects': cat === 'Projects',
+                    'btn-qa': cat === 'QA',
+                    'btn-cert': cat === 'Certifications'
+                }"
+                (click)="filterCategory(cat)">
+                {{ cat === 'Certifications' ? 'Education' : cat }}
+                <span class="filter-count">{{ getCategoryCount(cat) }}</span>
+            </button>
+        </div>
     </div>
+
+    <!-- Year Filter -->
+    <div class="filter-group">
+        <h3 class="filter-title">
+            <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Year
+        </h3>
+        <div class="filter-buttons year-buttons">
+            <button 
+                class="filter-btn btn-year"
+                [class.active]="selectedYear === 'All'"
+                (click)="filterYear('All')">
+                All Years
+                <span class="filter-count">{{ getYearCount('All') }}</span>
+            </button>
+            <button 
+                *ngFor="let year of availableYears"
+                class="filter-btn btn-year"
+                [class.active]="selectedYear === year"
+                (click)="filterYear(year)">
+                {{ year }}
+                <span class="filter-count">{{ getYearCount(year) }}</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Clear Filters Button -->
+    <button 
+        *ngIf="hasActiveFilters"
+        class="clear-filters-btn"
+        (click)="clearFilters()">
+        <svg class="clear-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+        Clear All Filters
+    </button>
 </aside>
+
+<!-- Results Count -->
+<div class="results-info" *ngIf="hasActiveFilters">
+    <span class="results-count">{{ filteredItems.length }}</span> 
+    {{ filteredItems.length === 1 ? 'result' : 'results' }} found
+    <span *ngIf="selectedCategory !== 'All'"> in <strong>{{ selectedCategory }}</strong></span>
+    <span *ngIf="selectedYear !== 'All'"> from <strong>{{ selectedYear }}</strong></span>
+</div>
 
 <div class="cv-cards-wrapper">
     <!-- Work Cards Container -->
     <section class="work-cards">
         <app-work-card
-            *ngFor="let item of filteredItems"
+            *ngFor="let item of filteredItems; trackBy: trackByTitle"
             [title]="item.title"
             [description]="item.description"
             [bullets]="item.bullets"
@@ -32,7 +100,6 @@
             [cardColor]="item.cardColor"
         ></app-work-card>
     </section>
-
 </div>
 
 <!-- Scroll to Top Button -->

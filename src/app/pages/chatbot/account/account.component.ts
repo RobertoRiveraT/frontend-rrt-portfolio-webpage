@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
-import { Router } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-account',
@@ -18,6 +19,7 @@ export class AccountComponent {
   constructor(
     private fb: FormBuilder,
     private api: ApiService,
+    private authService: AuthService,
     private router: Router
   ) {
     this.emailForm = this.fb.group({
@@ -30,33 +32,39 @@ export class AccountComponent {
   }
 
   updateEmail(): void {
+    if (this.emailForm.invalid) return;
+    
     const { newEmail } = this.emailForm.value;
   
     this.api.updateEmail(newEmail).subscribe({
       next: () => {
-        this.updateMessage = `Correo actualizado a: ${newEmail}`;
+        this.updateMessage = `Email updated to: ${newEmail}`;
         this.errorMessage = null;
+        this.emailForm.reset();
       },
       error: (err) => {
-        console.error('Error al actualizar correo:', err);
+        console.error('Error updating email:', err);
         this.updateMessage = null;
-        this.errorMessage = err.error.detail || 'Error al actualizar el correo.';
+        this.errorMessage = err.error?.detail || 'Error updating email.';
       }
     });
   }
   
   updatePassword(): void {
+    if (this.passwordForm.invalid) return;
+    
     const { newPassword } = this.passwordForm.value;
   
     this.api.updatePassword(newPassword).subscribe({
       next: () => {
         this.updateMessage = 'Password updated successfully';
         this.errorMessage = null;
+        this.passwordForm.reset();
       },
       error: (err) => {
         console.error('Error updating password:', err);
         this.updateMessage = null;
-        this.errorMessage = err.error.detail || 'Error al actualizar la contraseña.';
+        this.errorMessage = err.error?.detail || 'Error updating password.';
       }
     });
   }  
@@ -68,29 +76,22 @@ export class AccountComponent {
     this.api.deleteAccount().subscribe({
       next: () => {
         this.updateMessage = 'Account deleted successfully.';
-        localStorage.removeItem('token');
-        this.router.navigate(['/login']);
+        // AuthService handles token clearing via the API service
+        this.router.navigate(['/chatbot/login']);
       },
       error: (err) => {
         console.error('Error deleting account:', err);
-        this.errorMessage = err.error.detail || 'Error al eliminar la cuenta.';
+        this.errorMessage = err.error?.detail || 'Error deleting account.';
       }
     });
   }
 
-  goToNextStep(): void {
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.router.navigate(['/chatbot/chat']);
-    } else {
-      alert('You need to create an account or log in before continuing to the next step.');
-      this.router.navigate(['/chatbot/login']);
-    }
+  goToChat(): void {
+    this.router.navigate(['/chatbot/chat']);
   }
 
   logout(): void {
-    localStorage.removeItem('token');
+    this.authService.logout();
     this.router.navigate(['/chatbot/login']);
   }
-
 }

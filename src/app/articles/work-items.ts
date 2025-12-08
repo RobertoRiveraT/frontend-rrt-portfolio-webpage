@@ -1,4 +1,5 @@
 // 2025
+import { KenArtWebProject } from './items/2025/KenArtWebsite/kenartweb.project';
 import { AminotecWebRedesign } from './items/2025/AminotecplusNextjsWebpage/aminotecplusnextjs.project';
 import { WebpagePortfolioProject } from './items/2025/WebpagePortfolio/Webpage/webpage_portfolio.project';
 import { WebpageChatbotDemoProject } from './items/2025/WebpagePortfolio/ChatbotDemo/webpage_chatbot_demo.project';
@@ -36,6 +37,7 @@ import { HackMTY2019Award } from './items/2019/HackMX2019/hackmx2019.project';
 
 export const workItems = [
 // 2025
+KenArtWebProject,
 AminotecWebRedesign,
     WebpagePortfolioProject,
     WebpageChatbotDemoProject,

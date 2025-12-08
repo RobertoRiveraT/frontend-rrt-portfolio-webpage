@@ -1,118 +1,141 @@
-// Este servicio centraliza todas las llamadas al backend de chatbot_arelia.
-// Maneja login, registro, envío de mensajes y gestión del JWT en localStorage.
+/**
+ * ApiService - Centralized API calls for the chatbot backend
+ * Authentication headers are automatically handled by AuthInterceptor
+ */
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
+// Global window type extension for runtime environment override
 declare global {
-    interface Window {
-        __env?: {
-            baseUrl?: string;
-        };
-    }
+  interface Window {
+    __env?: {
+      baseUrl?: string;
+    };
+  }
 }
 
+// Response interfaces for type safety
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+export interface ApiResponse {
+  message?: string;
+  detail?: string;
+}
 
 @Injectable({
-providedIn: 'root'
+  providedIn: 'root'
 })
 export class ApiService {
 
-    constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
-    private get BASE_URL(): string {
-        return window?.__env?.baseUrl || environment.baseUrl;
-    }
+  /** Get base URL with runtime override support */
+  private get baseUrl(): string {
+    return window?.__env?.baseUrl || environment.baseUrl;
+  }
 
-    // Registro de usuario
-    register(email: string, password: string): Observable<any> {
-        return this.http.post(`${this.BASE_URL}/register`, { email, password });
-    }
+  // ============================================
+  // AUTHENTICATION
+  // ============================================
 
-    // Login y almacenamiento del token
-    login(email: string, password: string): Observable<any> {
-        const body = new URLSearchParams();
-        body.set('username', email);
-        body.set('password', password);
+  /**
+   * Register a new user
+   */
+  register(email: string, password: string): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.baseUrl}/register`, { email, password });
+  }
 
-        const headers = new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded'
-        });
+  /**
+   * Login user and store JWT token
+   */
+  login(email: string, password: string): Observable<LoginResponse> {
+    const body = new URLSearchParams();
+    body.set('username', email);
+    body.set('password', password);
 
-        return new Observable(observer => {
-        this.http.post(`${this.BASE_URL}/login`, body.toString(), { headers }).subscribe({
-            next: (res: any) => {
-            localStorage.setItem('token', res.access_token);
-            observer.next(res);
-            },
-            error: (err) => observer.error(err),
-            complete: () => observer.complete()
-        });
-        });
-    }
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded'
+    });
 
-    updateEmail(newEmail: string): Observable<any> {
-        const token = localStorage.getItem('token');
-        return this.http.put(`${this.BASE_URL}/update-email`, { new_email: newEmail }, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-        });
-    }
+    return this.http.post<LoginResponse>(`${this.baseUrl}/login`, body.toString(), { headers }).pipe(
+      tap((response) => {
+        // Store token using AuthService
+        this.authService.setToken(response.access_token);
+      })
+    );
+  }
 
-    updatePassword(newPassword: string): Observable<any> {
-        const token = localStorage.getItem('token');
-        return this.http.put(`${this.BASE_URL}/update-password`, { new_password: newPassword }, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-        });
-    }
+  // ============================================
+  // ACCOUNT MANAGEMENT
+  // ============================================
 
-    deleteAccount(): Observable<any> {
-        const token = localStorage.getItem('token');
-        return this.http.delete(`${this.BASE_URL}/delete-account`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-        });
-    }
+  /**
+   * Update user email
+   * Note: Authorization header is automatically added by AuthInterceptor
+   */
+  updateEmail(newEmail: string): Observable<ApiResponse> {
+    return this.http.put<ApiResponse>(`${this.baseUrl}/update-email`, { new_email: newEmail });
+  }
 
+  /**
+   * Update user password
+   */
+  updatePassword(newPassword: string): Observable<ApiResponse> {
+    return this.http.put<ApiResponse>(`${this.baseUrl}/update-password`, { new_password: newPassword });
+  }
 
-    // Enviar mensaje al bot
-    sendMessage(content: string): Observable<any> {
-        const token = localStorage.getItem('token');
-        const headers = new HttpHeaders({
-        'Authorization': `Bearer ${token}`
-        });
+  /**
+   * Delete user account
+   */
+  deleteAccount(): Observable<ApiResponse> {
+    return this.http.delete<ApiResponse>(`${this.baseUrl}/delete-account`).pipe(
+      tap(() => {
+        // Clear token on successful deletion
+        this.authService.clearToken();
+      })
+    );
+  }
 
-        return this.http.post(`${this.BASE_URL}/chat`, { content }, { headers });
-    }
+  // ============================================
+  // CHAT FUNCTIONALITY
+  // ============================================
 
-    // Obtener historial (si se implementa en el backend)
-    getMessages(): Observable<any> {
-        const token = localStorage.getItem('token');
-        const headers = new HttpHeaders({
-        'Authorization': `Bearer ${token}`
-        });
+  /**
+   * Get chat history for current user
+   */
+  getChatHistory(): Observable<ChatMessage[]> {
+    return this.http.get<ChatMessage[]>(`${this.baseUrl}/chat-history`);
+  }
 
-        return this.http.get(`${this.BASE_URL}/messages`, { headers });
-        }
+  /**
+   * Send a message to the chatbot
+   */
+  sendMessageToBot(message: string): Observable<ChatMessage> {
+    return this.http.post<ChatMessage>(`${this.baseUrl}/chat`, { content: message });
+  }
 
-    getChatHistory(): Observable<any> {
-        const token = localStorage.getItem('token');
-        return this.http.get(`${this.BASE_URL}/chat-history`, {
-        headers: { Authorization: `Bearer ${token}` }
-        });
-    }
-
-    sendMessageToBot(message: string): Observable<any> {
-        const token = localStorage.getItem('token');
-        return this.http.post(`${this.BASE_URL}/chat`, { content: message }, {
-        headers: { Authorization: `Bearer ${token}` }
-        });
-    }
-
+  /**
+   * Get all messages (if implemented in backend)
+   * @deprecated Use getChatHistory instead
+   */
+  getMessages(): Observable<ChatMessage[]> {
+    return this.http.get<ChatMessage[]>(`${this.baseUrl}/messages`);
+  }
 }

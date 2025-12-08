@@ -1,8 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { ApiService } from 'src/app/services/api.service';
 import { Router } from '@angular/router';
+import { ApiService, ChatMessage as ApiChatMessage } from '../../../services/api.service';
+import { AuthService } from '../../../services/auth.service';
 
-interface ChatMessage {
+interface DisplayMessage {
   sender: 'user' | 'bot';
   text: string;
   timestamp: Date;
@@ -14,29 +15,31 @@ interface ChatMessage {
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit {
-  messages: ChatMessage[] = [];
-  newMessage: string = '';
-  loading: boolean = false;
+  messages: DisplayMessage[] = [];
+  newMessage = '';
+  loading = false;
 
   @ViewChild('scrollMe') private chatContainer!: ElementRef;
 
   constructor(
     private api: ApiService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadMessages();
-    const token = localStorage.getItem('token');
-    if (!token) {
+    // AuthGuard handles authentication check, but double-check here
+    if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/chatbot/login']);
+      return;
     }
+    this.loadMessages();
   }
 
   loadMessages(): void {
     this.api.getChatHistory().subscribe({
-      next: (res) => {
-        this.messages = res.map((msg: any) => ({
+      next: (res: ApiChatMessage[]) => {
+        this.messages = res.map((msg) => ({
           sender: msg.role === 'assistant' ? 'bot' : 'user',
           text: this.linkify(msg.content),
           timestamp: new Date(msg.timestamp)
@@ -53,7 +56,7 @@ export class ChatComponent implements OnInit {
     const content = this.newMessage.trim();
     if (!content) return;
 
-    const userMsg: ChatMessage = {
+    const userMsg: DisplayMessage = {
       sender: 'user',
       text: this.linkify(content),
       timestamp: new Date()
@@ -65,8 +68,8 @@ export class ChatComponent implements OnInit {
     this.loading = true;
 
     this.api.sendMessageToBot(content).subscribe({
-      next: (res) => {
-        const botMsg: ChatMessage = {
+      next: (res: ApiChatMessage) => {
+        const botMsg: DisplayMessage = {
           sender: res.role === 'assistant' ? 'bot' : 'user',
           text: this.linkify(res.content),
           timestamp: new Date(res.timestamp)
@@ -103,8 +106,7 @@ export class ChatComponent implements OnInit {
   }
 
   goToNextStep(): void {
-    const token = localStorage.getItem('token');
-    if (token) {
+    if (this.authService.isLoggedIn()) {
       this.router.navigate(['/chatbot/account']);
     } else {
       alert('You need to create an account or log in before continuing to the next step.');

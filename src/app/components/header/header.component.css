@@ -2,41 +2,29 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 4rem; /* ajusta según lo que necesites */
+    margin-top: 4rem;
 }
 
 .sidebar {
     position: fixed;
     left: 0;
     top: 0;
-    width: 300px;
-    height: 100vh; /* Same as app.component.css -> margin-left*/
-    background-color: white; 
+    width: var(--sidebar-width);
+    height: 100vh;
+    background-color: var(--bg-primary);
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 0;
-    color: white;
-    z-index: 1000;
-}
-
-.fade-in {
-  opacity: 0;
-  animation: fadeIn 1.2s ease-out forwards;
-  animation-delay: 0.3s;
-}
-
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
+    color: var(--bg-primary);
+    z-index: var(--z-fixed);
 }
 
 .logo img {
-  width: 80px;
-  height: 80px;
-  cursor: pointer;
-  margin-bottom: 2rem;
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    margin-bottom: var(--spacing-xl);
 }
 
 .nav {
@@ -44,66 +32,66 @@
     flex-direction: column;
     align-items: center;
     gap: 1.1rem;
-    margin-top: 0rem;
-    margin-bottom: 3rem;
+    margin-top: 0;
+    margin-bottom: var(--spacing-2xl);
 }
 
 .nav a {
-    font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-    font-weight: 300;
+    font-family: var(--font-family-base);
+    font-weight: var(--font-weight-light);
     letter-spacing: 0.075em;
-    color: #1ad8fa;
+    color: var(--color-primary);
     text-decoration: none;
-    font-size: 1rem;
-    transition: color 0.2s ease;
+    font-size: var(--font-size-base);
+    transition: color var(--transition-fast);
 }
 
 .nav a:hover,
 .nav a.active {
-  color: rgb(38, 0, 255);
+    color: var(--color-primary-dark);
 }
 
 .nav a.chatbot-link:hover,
 .nav a.chatbot-link.active {
-  color: red;
+    color: var(--color-error);
 }
 
 .nav a.account-link {
-  color: #41e392; /* verde suave */
+    color: var(--color-secondary);
 }
 
 .nav a.account-link:hover,
 .nav a.account-link.active {
-  color: #2aaf6e;
+    color: var(--color-secondary-dark);
 }
 
 .social {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-bottom: 1rem;
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
 }
 
 .social a {
-  color: #1ad8fa;
-  font-size: 1.6rem;
-  transition: color 0.2s;
+    color: var(--color-primary);
+    font-size: 1.6rem;
+    transition: color var(--transition-fast);
 }
 
 .social a:hover {
-  color: rgb(38, 0, 255);
+    color: var(--color-primary-dark);
 }
 
 .social-icon {
     width: 24px;
     height: 24px;
-    fill: #1ad8fa;
-    transition: fill 0.3s ease;
-    margin: 0.5rem;
+    fill: var(--color-primary);
+    transition: fill var(--transition-normal);
+    margin: var(--spacing-sm);
 }
 
 .icon-link:hover .social-icon {
-    fill: rgb(38, 0, 255);
+    fill: var(--color-primary-dark);
 }
 
 /* --------------------- */

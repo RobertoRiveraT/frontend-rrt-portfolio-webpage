@@ -1,24 +1,42 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
+import { Subscription, filter } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent {
-
+export class HeaderComponent implements OnInit, OnDestroy {
   menuOpen = false;
-  public isLoggedIn: boolean = false;
+  isLoggedIn = false;
+  
+  private authSubscription?: Subscription;
+  private routerSubscription?: Subscription;
 
-  constructor(private router: Router) {
-    // Cierra el menú automáticamente al cambiar de ruta
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        this.menuOpen = false;
-      }
-      this.isLoggedIn = !!localStorage.getItem('token');
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    // Subscribe to authentication state changes
+    this.authSubscription = this.authService.isLoggedIn$.subscribe(
+      (loggedIn) => this.isLoggedIn = loggedIn
+    );
+
+    // Close menu on route change
+    this.routerSubscription = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.menuOpen = false;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.authSubscription?.unsubscribe();
+    this.routerSubscription?.unsubscribe();
   }
 
   toggleMenu(): void {
@@ -31,17 +49,11 @@ export class HeaderComponent {
   }
 
   goHome(): void {
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.router.navigate(['/home']);
-    } else {
-      this.router.navigate(['/home']);
-    }
+    this.router.navigate(['/home']);
   }
 
   goToAccount(): void {
-    const token = localStorage.getItem('token');
-    if (token) {
+    if (this.authService.isLoggedIn()) {
       this.router.navigate(['/chatbot/account']);
     } else {
       this.router.navigate(['/chatbot/login']);
